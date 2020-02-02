@@ -1,0 +1,49 @@
+{
+  "builders": [
+    {
+      "ami_description": "Parity Etherium Client",
+      "ami_name": "parity-eth-{{isotime | clean_resource_name}}-{{user `environment`}}",
+      "instance_type": "m3.medium",
+      "name": "parity-eth",
+      "region": "{{user `aws_region`}}",
+      "vpc_filter": {
+        "filters": {
+          "tag:Environment": "Build"
+        }
+      },
+      "subnet_filter": {
+        "filters": {
+          "tag:Name": "Public"
+        },
+        "most_free": true,
+        "random": false
+      },
+      "source_ami_filter": {
+        "filters": {
+          "architecture": "x86_64",
+          "block-device-mapping.volume-type": "gp2",
+          "name": "ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*",
+          "root-device-type": "ebs",
+          "virtualization-type": "hvm"
+        },
+        "most_recent": true,
+        "owners": [
+          "099720109477"
+        ]
+      },
+      "ssh_username": "ubuntu",
+      "type": "amazon-ebs"
+    }
+  ],
+  "min_packer_version": "1.5.1",
+  "provisioners": [
+    {
+      "type": "shell",
+      "script": "scripts/bootstrap.sh"
+    }
+  ],
+  "variables": {
+    "aws_region": "us-east-1",
+    "environment": "{{env `ENV`}}"
+  }
+}
