@@ -19,7 +19,7 @@ This repo provisions a Parity ETH client with CircleCI, Packer, Terraform on Ama
 
 ### Build Environment
 
-The terraform configs located in [terraform/BUILD](terraform/BUILD) provions a dedicated build environment to be used for all packer builds. The VPC spans multiple AZs with multiple subnets for various usecases.
+The terraform configs located in [terraform/BUILD](terraform/BUILD) provions a dedicated build environment to be used for all packer builds in the respective AWS accounts. The VPC spans multiple AZs with multiple subnets for various usecases.
 
 These resources need to be created first to ensure the sufficient network resources in your AWS account. The packer config makes use of the `vpc_filter` and `subnet_filter` to attach the packer builds to the correctly specified VPC and subnet. This ensure the build environment will not overlap with any other resources.
 
@@ -27,8 +27,8 @@ These resources need to be created first to ensure the sufficient network resour
 
 We make use of the following terraform modules:
 
+* [terraform-aws-vpc](https://github.com/terraform-aws-modules/terraform-aws-vpc)
 * [terraform-aws-autoscaling](https://github.com/terraform-aws-modules/terraform-aws-autoscaling)
-* [terraform-aws-alb](https://github.com/terraform-aws-modules/terraform-aws-alb)
 * [terraform-aws-security-group](https://github.com/terraform-aws-modules/terraform-aws-security-group)
 
 ## Remote state and locking
@@ -37,9 +37,9 @@ Use of [terrafom enterpise](https://app.terraform.io/app/stratotechnology/worksp
 
 ## Environments
 
-We instrument our own custom terraform [modules](modules), which inherits config from the defined module sources, but allows us to set our own variables for PROD and QA.
+We instrument our own custom terraform [modules](modules), which inherits config from the defined module sources, but allows us to set our own variables for PROD and DEV.
 
-The root config for each environment lives in the corresponding directory [terraform/QA](terraform/QA) or [terraform/PROD](terraform/PROD). We then reference the base module in our scripts as shown below:
+The root config for each environment lives in the corresponding directory [terraform/DEV](terraform/DEV) or [terraform/PROD](terraform/PROD). We then reference the base module in our scripts as shown below:
 
 ```terraform
 
@@ -69,3 +69,6 @@ module "parity-eth" {
 - [ ] Configure multiple nodes to join
 - [ ] SSL certificates on all enpoints
 - [ ] Configure the parity service for correct use cases (ie mining etc)
+- [ ] Publish the Terraform module to the terraform module registry
+- [ ] semantic version and release on the repo (goes with publishing TF versions)
+- [ ] Automate the build infra terraform as well
