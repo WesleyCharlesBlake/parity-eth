@@ -1,0 +1,7 @@
+---
+# handlers file for parity-eth
+- name: reload parity
+  service: name=parity state=reloaded
+
+- name: restart parity
+  service: name=parity state=restarted

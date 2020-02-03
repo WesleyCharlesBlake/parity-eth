@@ -1,0 +1,19 @@
+---
+# tasks file for common
+#- name: env | load PROD or QA variables
+#  include_vars:
+#    file: "{{ lookup('env','ENV') }}.yml"
+
+- name: apt | update apt-cache
+  apt:
+    update_cache: yes
+    force_apt_get: yes
+
+- name: apt | install dependancies
+  apt:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - build-essential 
+    - cmake 
+    - libudev-dev

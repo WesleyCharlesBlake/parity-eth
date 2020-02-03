@@ -24,7 +24,7 @@ jobs:
           name: Validate base
           command: packer validate parity-eth.json
 
-  packer-build: &packer-build
+  packer-build:
     executor: packer
     steps:
       - checkout:
@@ -46,7 +46,7 @@ jobs:
               echo "${SUB_DIR}/ not modified; no need to publish"
             fi
 
-  tf-validate: &tf-validate
+  tf-validate:
     executor: terraform
     steps:
       - checkout:
@@ -60,7 +60,7 @@ jobs:
             terraform validate
           no_output_timeout: 30m
 
-  tf-plan: &tf-plan
+  tf-plan:
     executor: terraform
     steps:
       - checkout:
@@ -74,69 +74,28 @@ jobs:
             terraform plan
           no_output_timeout: 30m
 
-  
-  packer-build-prod:
-    <<: *packer-build
-  packer-build-qa:
-    <<: *packer-build
-  tf-validate-prod:
-    <<: *tf-validate
-  tf-validate-qa:
-    <<: *tf-validate
-  tf-plan-prod:
-    <<: *tf-plan
-  tf-plan-qa:
-    <<: *tf-plan
-
 workflows:
   version: 2
   build-and-deploy:
     jobs:
-      ### COMMON between environments
       - packer-validate
       - compare-url/reconstruct:
           context: cci-api
-          
-      ### QA
-      - packer-build-qa:
-          context: Packer-QA
-          requires:
-            - packer-validate
-            - compare-url/reconstruct
-          filters:
-            branches:
-              ignore: master
-      - tf-validate-qa:
-          context: Packer-QA
-          filters:
-            branches:
-              ignore: master
-      - tf-plan-qa:
-          context: Packer-QA
-          requires:
-            - packer-build-qa
-          filters:
-            branches:
-              ignore: master
-
-      ### PROD
-      - packer-build-prod:
-          context: Packer-PROD
+      - packer-build:
+          context: AWS-DEVOPS
           requires:
             - packer-validate
             - compare-url/reconstruct
           filters:
             branches:
               only: master
-      - tf-validate-prod:
-          context: Packer-PROD
+      - tf-validate:
           filters:
             branches:
               only: master
-      - tf-plan-prod:
-          context: Packer-PROD
+      - tf-plan:
           requires:
-            - packer-build-prod
+            - packer-build
           filters:
             branches:
               only: master

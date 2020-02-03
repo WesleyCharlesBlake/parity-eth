@@ -1,0 +1,10 @@
+---
+# local dev playbook
+- hosts: local
+  connection: local
+  gather_facts: true
+  become: true
+  become_method: sudo
+  roles:
+    - common
+    - parity-eth

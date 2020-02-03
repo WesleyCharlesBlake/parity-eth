@@ -38,8 +38,10 @@
   "min_packer_version": "1.5.1",
   "provisioners": [
     {
-      "type": "shell",
-      "script": "scripts/bootstrap.sh"
+      "playbook_file": "ansible/ami-build.yml",
+      "extra_arguments": [],
+      "user":"ubuntu",
+      "type": "ansible"
     }
   ],
   "variables": {

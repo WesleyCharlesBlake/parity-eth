@@ -1,0 +1,52 @@
+---
+# tasks file for parity-eth
+
+- name: parity | download parity binary  
+  get_url: 
+    url: https://releases.parity.io/ethereum/v2.7.1/x86_64-unknown-linux-gnu/parity
+    dest: /usr/bin/
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: parity | ensure config dirs exist
+  file:
+    path: "{{ item.path }}"
+    state: "{{ item.state }}"
+    owner: root
+    group: root
+    force: yes
+  with_items:
+    - { path: /etc/parity, state: directory }
+
+- name: parity | configuration
+  template: 
+    src: config.toml.j2 
+    dest: /etc/parity/config.toml
+    owner: root
+    group: root
+    mode: "0640"
+  notify:
+    - restart parity
+  tags: parity-eth
+
+- name: parity | systemd service
+  template: 
+    src: parity.service.j2 
+    dest: /etc/systemd/system/parity.service
+    owner: root
+    group: root
+    mode: "0775"
+  #notify:
+  #  - restart nginx
+  tags: parity-eth
+
+- name: parity | enable systemd unit
+  systemd:
+    name: parity.service
+    state: started
+    enabled: yes
+  tags: parity-eth
+
+
+
