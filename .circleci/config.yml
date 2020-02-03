@@ -24,7 +24,7 @@ jobs:
           name: Validate base
           command: packer validate parity-eth.json
 
-  packer-build:
+  packer-build: &packer-build
     executor: packer
     steps:
       - checkout:
@@ -40,11 +40,6 @@ jobs:
             if [[ $(git diff $COMMIT_RANGE --name-status | grep "$SUB_DIR") ]]; then
 
               echo "files changed in  ${SUB_DIR}/ ; building new AMI"
-              if [ "${CIRCLE_BRANCH}" == "master" ]; then
-                  export ENV=PROD
-              else
-                  export ENV=DEV
-              fi
 
               packer build parity-eth.json
 
@@ -52,7 +47,7 @@ jobs:
               echo "${SUB_DIR}/ not modified; no need to publish"
             fi
 
-  tf-validate:
+  tf-validate: &tf-validate
     executor: terraform
     steps:
       - checkout:
@@ -62,18 +57,12 @@ jobs:
           command: |
             printf 'credentials "app.terraform.io" { \n  token = "%s" \n}\n' "$TFE_TOKEN" > ~/.terraformrc
 
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-                export ENV=PROD
-            else
-                export ENV=DEV
-            fi
-
             cd ${ENV}
             terraform init
             terraform validate
           no_output_timeout: 30m
 
-  tf-plan:
+  tf-plan: &tf-plan
     executor: terraform
     steps:
       - checkout:
@@ -82,31 +71,74 @@ jobs:
           name: Terraform Plan
           command: |
             printf 'credentials "app.terraform.io" { \n  token = "%s" \n}\n' "$TFE_TOKEN" > ~/.terraformrc
-            
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-                export ENV=PROD
-            else
-                export ENV=DEV
-            fi
 
             cd ${ENV}
             terraform init
             terraform plan
           no_output_timeout: 30m
 
+  packer-build-prod:
+    <<: *packer-build
+  packer-build-qa:
+    <<: *packer-build
+  tf-validate-prod:
+    <<: *tf-validate
+  tf-validate-qa:
+    <<: *tf-validate
+  tf-plan-prod:
+    <<: *tf-plan
+  tf-plan-qa:
+    <<: *tf-plan
+
 workflows:
   version: 2
   build-and-deploy:
     jobs:
+      ### Common to all ENVs
       - packer-validate
       - compare-url/reconstruct:
           context: cci-api
-      - packer-build:
+
+      ### QA
+      - packer-build-qa:
           context: AWS-DEVOPS
           requires:
             - packer-validate
             - compare-url/reconstruct
-      - tf-validate
-      - tf-plan:
+          filters:
+            branches:
+              ignore: master
+      - tf-validate-qa:
+          context: AWS-DEVOPS
+          filters:
+            branches:
+              ignore: master
+      - tf-plan-qa:
+          context: AWS-DEVOPS
           requires:
-            - packer-build
+            - packer-build-qa
+          filters:
+            branches:
+              ignore: master
+
+      ### PROD
+      - packer-build-prod:
+          context: AWS-PROD
+          requires:
+            - packer-validate
+            - compare-url/reconstruct
+          filters:
+            branches:
+              only: master
+      - tf-validate-prod:
+          context: AWS-PROD
+          filters:
+            branches:
+              only: master
+      - tf-plan-prod:
+          context: AWS-PROD
+          requires:
+            - packer-build-prod
+          filters:
+            branches:
+              only: master
