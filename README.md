@@ -1,4 +1,15 @@
-# Parity Etherium 
+# Parity Etherium
+
+## Build Status
+
+### Production
+
+[![CircleCI](https://circleci.com/gh/WesleyCharlesBlake/parity-eth/tree/master.svg?style=shield)](https://circleci.com/gh/WesleyCharlesBlake/parity-eth/tree/master)
+
+### Develop
+
+[![CircleCI](https://circleci.com/gh/WesleyCharlesBlake/parity-eth/tree/develop.svg?style=shield)](https://circleci.com/gh/WesleyCharlesBlake/parity-eth/tree/develop)
+
 
 This repo provisions a Parity ETH client with CircleCI, Packer, Terraform on Amazon Web Services
 
@@ -31,6 +42,30 @@ We instrument our own custom terraform [modules](modules), which inherits config
 The root config for each environment lives in the corresponding directory [terraform/QA](terraform/QA) or [terraform/PROD](terraform/PROD). We then reference the base module in our scripts as shown below:
 
 ```terraform
+
+provider "aws" {
+  region = "us-east-1"
+}
+
+module "parity-eth" {
+  source = "../modules/stack"
+
+  aws_account_id = "<AWS_ACCOUNT_ID>"
+  
+  environment_name = "MyEnv"
+  owner            = "SomePerson"
+  service_name     = "parity-eth"
+
+  ec2_key           = "some-key"
+  ec2_instance_type = "t3.small"
+  ec2_min_capacity = 1
+  ec2_max_capacity = 1
+  ec2_desired_capacity = 1
+}
 ```
 
-## CI/CD
+## TODO
+
+- [ ] Configure multiple nodes to join
+- [ ] SSL certificates on all enpoints
+- [ ] Configure the parity service for correct use cases (ie mining etc)
