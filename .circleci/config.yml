@@ -97,7 +97,7 @@ workflows:
       ### Common to all ENVs
       - packer-validate
       - compare-url/reconstruct:
-          context: cci-api
+          context: CIRCLECI-API
 
       ### QA
       - packer-build-qa:
