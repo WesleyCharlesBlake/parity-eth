@@ -2,7 +2,7 @@ version: 2.1
 executors:
   packer:
     docker:
-      - image: hashicorp/packer:1.5.1
+      - image: wesleycharlesblake/devops-tools:0.1.20
     working_directory: ~/parity-eth-project/packer
 
   terraform:
