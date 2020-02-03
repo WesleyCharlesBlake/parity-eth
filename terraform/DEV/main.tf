@@ -16,7 +16,7 @@ module "parity-eth-stack" {
 
   aws_account_id = "793811785479"
   
-  environment_name = "QA"
+  environment_name = "DEV"
   owner            = "DevOps"
   service_name     = "parity-eth"
 
