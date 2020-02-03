@@ -14,7 +14,7 @@ provider "aws" {
 module "parity-eth" {
   source = "../modules/stack"
 
-  aws_account_id = "793811785479"
+  aws_account_id = "994665119991"
   
   environment_name = "PROD"
   owner            = "DevOps"
