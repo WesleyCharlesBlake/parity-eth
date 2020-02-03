@@ -20,11 +20,10 @@ module "parity-eth" {
   owner            = "DevOps"
   service_name     = "parity-eth"
 
-  ec2_key           = "strato-devops"
+  ec2_key           = "prod-us-east-1"
   ec2_instance_type = "t3.small"
   ec2_min_capacity = 1
   ec2_max_capacity = 1
   ec2_desired_capacity = 1
-
 
 }
